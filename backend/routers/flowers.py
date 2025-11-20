@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 
-router = APIRouter(prefix="/flowers")
+router = APIRouter(prefix="/flowers", tags=["Flowers"])
 
 
 

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 
-router = APIRouter(prefix="/order")
+router = APIRouter(prefix="/order", tags=["Payments"])
 
 
 @router.post("/create_order/{card_id}")
@@ -21,7 +21,7 @@ async def create_order(
 
     card = await db.execute(select(Flower).where(Flower.id == card_id))
     db_card = card.scalar_one_or_none()
-    if db_card:
+    if db_card and db_card.available == True:
         db_payment = Payment(
             flower_id=card_id,
             **payment_data.model_dump()
@@ -31,8 +31,7 @@ async def create_order(
         await db.refresh(db_payment)
         return {"payment_data": db_payment,
                 "price": db_card.price}
-    return {"card": card.scalar_one_or_none(),
-            "payment_data": payment_data}
+    return "Flower is not found"
 
 
 

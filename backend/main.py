@@ -16,6 +16,6 @@ async def startup_event():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-@app.get("/")
-def hello_world():
-    return {"hello": "world"}
+# @app.get("/")
+# def hello_world():
+#     return {"hello": "world"}
