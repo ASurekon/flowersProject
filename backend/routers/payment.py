@@ -1,10 +1,10 @@
 from typing import Annotated, Optional
-from fastapi import APIRouter
-from fastapi.params import Depends
+from fastapi import APIRouter, Query, Depends 
 from sqlalchemy import select
+from enum import Enum
 from database import get_db
 from models import Flower, Payment
-from schemas import PaymentCreate
+from schemas import PaymentCreate, PaymentUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -35,16 +35,22 @@ async def create_order(
             "payment_data": payment_data}
 
 
+
 @router.patch("/update_order_status/{payment_id}")
 async def update_status(
     payment_id: int,
-    paid: Optional[Annotated[bool, Depends()]],
-    given_out: Optional[bool],
-    closed: Optional[bool]
+    update_data: Annotated[PaymentUpdate, Depends()],
+    db: AsyncSession = Depends(get_db)
 ):
-    return {
-        "payment_id": payment_id,
-        "paid": paid,
-        "given_out": given_out,
-        "closed": closed
-    }
+    
+    updated = update_data.model_dump(exclude_defaults=True)
+    payment = await db.execute(select(Payment).where(Payment.id == payment_id))
+    db_payment = payment.scalar_one_or_none()
+    
+    for field, value in updated.items():
+        setattr(db_payment, field, value)
+
+    db.add(db_payment)
+    await db.commit()
+    await db.refresh(db_payment)
+    return db_payment

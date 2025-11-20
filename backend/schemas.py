@@ -21,6 +21,12 @@ class PaymentInDB(PaymentCreate):
     closed: bool = False
 
 
+class PaymentUpdate(PaymentBase):
+    paid: Optional[bool] = False
+    given_out: Optional[bool] = False
+    closed: Optional[bool] = False
+
+
 class FlowerBase(BaseModel):
     title: str
     price: float
